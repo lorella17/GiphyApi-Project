@@ -19,9 +19,6 @@
 <div class="container" text align="right">
     <h1>Cartoon Character Search</h1>
 
-    <!-- Cartoon Characters will Get Dumped Dere -->
-    <div id="cartoons-view"></div>
-
     <!-- Rendered Buttons will get Dumped Here  -->
     <div id="buttons-view"></div>
 
@@ -33,24 +30,29 @@
 
         <!-- Button triggers new cartoon character to be added -->
         <input id="add-cartoon" type="submit" value="Submit Request">
+        <br>
+
     </form>
+    <!-- Cartoon Characters will Get Dumped Dere -->
+    <div id="cartoons-view"></div>
+
 </div>
 
 <script type="text/javascript">
-    var cartoons = ["Bugs"];
+    var topics = ["Bugs Bunny"];
 
     var giphyAPIKey = "nOZpWqC7LB3h8PFVehJGu2AvqB6uWKC6";
 
-    // displayMovieInfo function re-renders the HTML to display the appropriate content
+    // displaycharacterInfo function re-renders the HTML to display the appropriate content
     function displaycartoonInfo() {
+        $("#cartoons-view").empty();
 
-        var cartoons = $(this).attr("data-name");
-        console.log(cartoons);
+        var topics = $(this).attr("data-character");
+        console.log(topics);
+
 
         var queryURL = "https://api.giphy.com/v1/gifs/search?q=" +
-            cartoons + "&api_key=nOZpWqC7LB3h8PFVehJGu2AvqB6uWKC6&limit=5";
-
-
+            topics + "&api_key=nOZpWqC7LB3h8PFVehJGu2AvqB6uWKC6&limit=10";
 
         // Creating an AJAX call for the specific cartoon button being clicked
         $.ajax({
@@ -58,36 +60,54 @@
             method: "GET"
         }).then(function(response) {
 
-            var result = response.data;
+            var results = response.data;
+            console.log(results);
 
-            // Creating a div to hold the cartoon
-            var cartoonDiv = $("<div class='cartoon'>");
+            // Creating a div to hold the characters
+            var characterDiv = $("<div class='characters'>");
 
-            // Storing the rating data
-            var rating = response.Rated;
+            // Looping through each result item
+            for (var i = 0; i < results.length; i++) {
 
-            // Creating an element to have the rating displayed
-            var pOne = $("<p>").text("Rating: " + result[i].rating);
+                // Creating an element to have the rating displayed
+                var pOne = $("<p>").text("Rating: " + results[i].rating);
 
-            // Displaying the rating
-            cartoonDiv.append(pOne);
+                // Displaying the rating
+                characterDiv.append(pOne);
 
-            // Retrieving the URL for the image
-            var imgURL = response.Poster;
+                // Retrieving the URL for the image
+                var imgURL = response.Poster;
 
-            // Creating an element to hold the image
-            var image = $("<img>");
+                // Creating an element to hold the image
+                var image = $("<img>");
 
-            image.attr("src", results[i].images.fixed_height.url);
+                image.attr("src", results[i].images.fixed_height_still.url);
+                image.attr("data-still", results[i].images.fixed_height_still.url);
+                image.attr("data-animate", results[i].images.fixed_height.url);
+                image.attr("data-state", "still");
+                image.addClass("cc");
 
-            // Appending the image
-            cartoonDiv.append(image);
+                // Appending the image
+                characterDiv.append(pOne);
+                characterDiv.append(image);
 
-            // Putting the cartoon character
-            $("#cartoons-view").append(cartoonDiv);
+                // Putting the cartoon character
+                $("#cartoons-view").append(characterDiv);
+            }
         });
 
     }
+
+    $(document).on("click", ".cc", function () {
+        var state = $(this).attr("data-state");
+        if (state === "still") {
+            $(this).attr("src", $(this).attr("data-animate"));
+            $(this).attr("data-state", "animate");
+        } else {
+            $(this).attr("src", $(this).attr("data-still"));
+            $(this).attr("data-state", "still");
+        }
+    });
 
     // Function for displaying cartoon data
     function renderButtons() {
@@ -96,8 +116,9 @@
         // (this is necessary otherwise you will have repeat buttons)
         $("#buttons-view").empty();
 
+
         // Looping through the array of cartoon characters
-        for (var i = 0; i < cartoons.length; i++) {
+        for (var i = 0; i < topics.length; i++) {
 
             // Then dynamicaly generating buttons for each cartoon in the array
             // This code $("<button>") is all jQuery needs to create the beginning and end tag. (<button></button>)
@@ -105,10 +126,10 @@
             // Adding a class of cartoon-btn to our button
             a.addClass("cartoon-btn btn btn-info");
             // Adding a data-attribute
-            a.attr("data-name", cartoons[i]);
+            a.attr("data-character", topics[i]);
 
             // Providing the initial button text
-            a.text(cartoons[i]);
+            a.text(topics[i]);
             // Adding the button to the buttons-view div
             $("#buttons-view").append(a);
 
@@ -123,21 +144,23 @@
         $("#cartoon-input").empty().val('');
 
         // Adding cartoon from the textbox to our array
-        cartoons.push(cartoon);
+        topics.push(cartoon);
 
-        // Calling renderButtons which handles the processing of our movie array
+        // Calling renderButtons which handles the processing of our topic array
         renderButtons();
     });
 
-    // Adding a click event listener to all elements with a class of "movie-btn"
+
+    // Adding a click event listener to all elements with a class of "cartoon-btn"
     $(document).on("click", ".cartoon-btn", displaycartoonInfo);
 
     // Calling the renderButtons function to display the intial buttons
     renderButtons();
-</script>
 
 
+
 </script>
+
 
 </body>
 
